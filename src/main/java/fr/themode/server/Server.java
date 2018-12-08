@@ -124,7 +124,7 @@ public class Server {
             long lastRequestId = gameConnection.getLastRequestId();
             long requiredRequestId = this.requiredRequestId.getOrDefault(gameConnection, -1L);
             long requestId = packet.requestId;
-            if (requestId == requiredRequestId) {
+            if (requestId == requiredRequestId && requestId != -1) {
                 this.requiredRequestId.remove(gameConnection);
             } else if (requiredRequestId != -1 || requestId > lastRequestId + 1) {
                 return;
