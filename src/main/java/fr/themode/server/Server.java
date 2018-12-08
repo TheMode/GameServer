@@ -8,7 +8,9 @@ import fr.themode.packet.Packet;
 import fr.themode.packet.ReconciliationPacket;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class Server {
 
@@ -19,6 +21,8 @@ public class Server {
     private com.esotericsoftware.kryonet.Server kryoServer;
     private Kryo kryo;
     private GameListener listener;
+
+    private Map<GameConnection, Long> requiredRequestId;
 
     private LinkedList<PacketHandler> packets;
     private ServerUpdate serverUpdate;
@@ -33,6 +37,8 @@ public class Server {
         this.kryoServer = new com.esotericsoftware.kryonet.Server();
         this.kryo = this.kryoServer.getKryo();
         this.listener = new GameListener();
+
+        this.requiredRequestId = new HashMap<>();
 
         this.packets = new LinkedList<>();
         this.serverUpdate = new ServerUpdate(this.packets, update_per_seconds);
@@ -88,8 +94,10 @@ public class Server {
     }
 
     public void sendReconciliation(GameConnection connection, Packet packet) {
+        long requestId = packet.requestId;
         ReconciliationPacket reconciliationPacket = new ReconciliationPacket();
-        reconciliationPacket.requestId = packet.requestId;
+        reconciliationPacket.requestId = requestId;
+        this.requiredRequestId.put(connection, requestId);
         sendToTCP(connection, reconciliationPacket);
     }
 
@@ -111,13 +119,23 @@ public class Server {
 
         listener.addTypeHandler(clazz, ((connection, packet) -> {
             GameConnection gameConnection = listener.getConnection(connection);
+
+            // Check if packet should be keep
+            long lastRequestId = gameConnection.getLastRequestId();
+            long requiredRequestId = this.requiredRequestId.getOrDefault(gameConnection, -1L);
+            long requestId = packet.requestId;
+            if (requestId == requiredRequestId) {
+                this.requiredRequestId.remove(gameConnection);
+            } else if (requiredRequestId != -1 || requestId > lastRequestId + 1) {
+                return;
+            }
+
             PacketHandler packetHandler = new PacketHandler();
             packetHandler.connection = gameConnection;
             packetHandler.packet = packet;
             this.packets.add(packetHandler);
 
             gameConnection.setLastRequestId(packet.requestId);
-            //callback.apply(gameConnection, packet);
         }));
     }
 

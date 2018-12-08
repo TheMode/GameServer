@@ -46,7 +46,7 @@ public class ClientDemo {
 
             System.out.println("Position: " + player.getX());
 
-            // Before being sent, movePacket get an unique ID (requestId) and currentTimeMillis
+            // Before being sent, movePacket get an unique requestId
             client.sendTCP(movePacket);
 
             try {
