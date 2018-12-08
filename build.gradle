@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'fr.themode.server'
+version '1.0'
+
+sourceCompatibility = 1.11
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'com.github.crykn:kryonet:08ffb04221'
+}
