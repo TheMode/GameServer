@@ -64,11 +64,11 @@ public class Server {
     }
 
     public void sendToTCP(GameConnection connection, Packet packet) {
-        kryoServer.sendToTCP(connection.getKryoConnection().getID(), packet);
+        kryoServer.sendToTCP(connection.getID(), packet);
     }
 
     public void sendToUDP(GameConnection connection, Packet packet) {
-        kryoServer.sendToUDP(connection.getKryoConnection().getID(), packet);
+        kryoServer.sendToUDP(connection.getID(), packet);
     }
 
     public void sendToAllTCP(Packet packet) {
@@ -80,11 +80,11 @@ public class Server {
     }
 
     public void sendToAllExceptTCP(GameConnection connection, Packet packet) {
-        kryoServer.sendToAllExceptTCP(connection.getKryoConnection().getID(), packet);
+        kryoServer.sendToAllExceptTCP(connection.getID(), packet);
     }
 
     public void sendToAllExceptUDP(GameConnection connection, Packet packet) {
-        kryoServer.sendToAllExceptUDP(connection.getKryoConnection().getID(), packet);
+        kryoServer.sendToAllExceptUDP(connection.getID(), packet);
     }
 
     public void registerPacket(Class<? extends Packet> clazz) {
@@ -111,6 +111,10 @@ public class Server {
             packetHandler.packet = packet;
             this.packets.add(packetHandler);
         }));
+    }
+
+    public void onUpdateEnd(Runnable runnable) {
+        this.serverUpdate.setRunnable(runnable);
     }
 
     public void onDisconnection(Callback.DisconnectionCallBack disconnectionCallBack) {

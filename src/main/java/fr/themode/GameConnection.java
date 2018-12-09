@@ -11,6 +11,10 @@ public class GameConnection {
         this.kryoConnection = kryoConnection;
     }
 
+    public int getID() {
+        return getKryoConnection().getID();
+    }
+
     public Connection getKryoConnection() {
         return kryoConnection;
     }

@@ -13,7 +13,7 @@ public class ServerUpdate {
 
     private Server server;
     private LinkedList<PacketHandler> packets;
-    private Map<Class<?>, Callback.PacketCallBack> callbacks;
+    private Map<Class<? extends Packet>, Callback.PacketCallBack> callbacks;
 
     private Map<GameConnection, Long> requiredRequestId;
 
@@ -21,6 +21,8 @@ public class ServerUpdate {
 
     private long delay;
     private long lastUpdate;
+
+    private Runnable runnable;
 
     public ServerUpdate(Server server, LinkedList<PacketHandler> packets, int ups) {
         this.server = server;
@@ -55,7 +57,7 @@ public class ServerUpdate {
                             PacketHandler packetHandler = packets.poll();
                             GameConnection connection = packetHandler.connection;
                             Packet packet = packetHandler.packet;
-                            Class<?> clazz = packet.getClass();
+                            Class<? extends Packet> clazz = packet.getClass();
                             Callback.PacketCallBack callback = this.callbacks.getOrDefault(clazz, null);
                             if (callback != null && shouldBeKeep(connection, packet)) {
                                 connection.setLastRequestId(packet.requestId);
@@ -71,11 +73,17 @@ public class ServerUpdate {
                             }
                         }
                         //System.out.println("delay: " + (System.currentTimeMillis() - time));
-                        // TODO send all packets
+                        if (runnable != null) {
+                            runnable.run();
+                        }
                     }
                 }
             }
         }).start();
+    }
+
+    public void setRunnable(Runnable runnable) {
+        this.runnable = runnable;
     }
 
     protected void sendReconciliation(GameConnection connection, Packet packet) {

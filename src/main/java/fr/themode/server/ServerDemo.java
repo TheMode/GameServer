@@ -15,6 +15,9 @@ public class ServerDemo {
 
     private Map<GameConnection, Player> players = new HashMap<>();
 
+    // Answer related stuffs
+    private Map<GameConnection, Float> positions = new HashMap<>();
+
     public ServerDemo() {
         int tcp = 25565;
         int udp = 25565;
@@ -23,40 +26,37 @@ public class ServerDemo {
 
         server.registerPacket(PlayerMovePacket.class);
 
-        // In number of server update
-        // server.setEntityInterpolationDelay(1);
-
         server.onConnection(connection -> {
             System.out.println("New player !");
             players.put(connection, new Player());
         });
 
         server.onPacket(PlayerMovePacket.class, (connection, packet) -> {
-            // System.out.println("RECEIVE MOVE PACKET");
             float x = packet.x;
-            System.out.println("ID: "+packet.requestId);
             boolean success = new Random().nextBoolean(); // Player have 50% chance to walk successfully, otherwise, he will have a rollback
             if (success) {
                 // Send to other players
                 Player player = getPlayer(connection);
-                player.setX(player.getX()+x);
-                System.out.println("X: " + player.getX());
-                // TODO entity interpolation
-                /*EntityMovePacket entityMovePacket = new EntityMovePacket();
-                entityMovePacket.id = client.getID();
-                entityMovePacket.x = x;
-                entityMovePacket.y = player.getY();
+                float newX = player.getX() + x;
+                player.setX(newX);
+                System.out.println("The player " + connection.getID() + " position is now :" + newX);
 
-                // Send position change to all clients except the one which moved (client object)
-                server.sendToAllExceptTCP(connection, entityMovePacket);*/
+                // the value represents the change in position compared to the last server update
+                this.positions.put(connection, this.positions.getOrDefault(connection, 0f) + x);
                 return PacketResult.SUCCESS;
             } else {
                 // Packet is invalid (ex: moving too fast)
+                // Returning reconciliation make the server warns the player, he'll then come back to his previous local state
                 return PacketResult.RECONCILIATION;
-                //server.sendReconciliation(connection, packet);
             }
         });
 
+        // After all packets being processed, this is called
+        // It is better usage to send all answers here (Send one large packet instead of multiple small one
+        server.onUpdateEnd(() -> {
+            // Send packets here
+            this.positions.clear();
+        });
 
         server.start();
     }

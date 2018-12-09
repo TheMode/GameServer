@@ -28,6 +28,7 @@ public class ClientDemo {
         // EntityState entityState = client.getEntityState();
 
         // Used for everything local where changes need server authorization (ex: local player movements)
+        // All used components types need to be register using Client#registerObject
         LocalState localState = client.getLocalState();
         localState.setComponent("player", new Player());
 
@@ -52,7 +53,6 @@ public class ClientDemo {
             // Before being sent, movePacket get an unique requestId
             client.sendTCP(movePacket);
 
-
             if (System.currentTimeMillis() - time >= maxTime) {
                 System.out.println("END CLIENT");
                 break;
@@ -65,7 +65,8 @@ public class ClientDemo {
             }
         }
 
-        while(true){
+        // Prevent client to disconnect
+        while (true) {
 
         }
     }
