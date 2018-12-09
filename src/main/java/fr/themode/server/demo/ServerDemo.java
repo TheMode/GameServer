@@ -1,7 +1,8 @@
-package fr.themode.server;
+package fr.themode.server.demo;
 
 import fr.themode.GameConnection;
-import fr.themode.server.demo.PlayerMovePacket;
+import fr.themode.server.PacketResult;
+import fr.themode.server.Server;
 
 import java.util.HashMap;
 import java.util.Map;
