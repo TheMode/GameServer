@@ -83,6 +83,7 @@ public class Client {
 
     public void onReconciliation(Consumer<Long> consumer) {
         this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
+            System.out.println("ERROR");
             long requestId = packet.requestId;
             restoreState(requestId);
             consumer.accept(requestId);
@@ -103,7 +104,7 @@ public class Client {
         this.localState.update(newState);
         this.stateCounter = id - 1;
 
-        // Remove newer states
+        // Remove all other states
         //System.out.println("SIZE BEFORE: " + states.size());
         this.states.keySet().removeIf(stateId -> stateId > id - 1);
         //System.out.println("SIZE AFTER: " + states.size());

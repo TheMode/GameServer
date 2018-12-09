@@ -33,6 +33,9 @@ public class ClientDemo {
 
         client.connect();
 
+        long time = System.currentTimeMillis();
+        long maxTime = 2000;
+
         while (true) {
             // Save current local state before changing it (in order to backup it with server reconciliation)
             // Should be used each time we modify a state component and send a packet related to this
@@ -49,11 +52,21 @@ public class ClientDemo {
             // Before being sent, movePacket get an unique requestId
             client.sendTCP(movePacket);
 
+
+            if (System.currentTimeMillis() - time >= maxTime) {
+                System.out.println("END CLIENT");
+                break;
+            }
+
             try {
-                Thread.sleep(250);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+
+        while(true){
+
         }
     }
 }

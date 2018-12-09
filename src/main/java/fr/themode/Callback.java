@@ -1,6 +1,7 @@
 package fr.themode;
 
 import fr.themode.packet.Packet;
+import fr.themode.server.PacketResult;
 
 public class Callback {
 
@@ -9,7 +10,7 @@ public class Callback {
     }
 
     public interface PacketCallBack<T extends Packet> {
-        public void apply(GameConnection connection, T packet);
+        public PacketResult apply(GameConnection connection, T packet);
     }
 
     public interface DisconnectionCallBack {

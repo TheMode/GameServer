@@ -32,15 +32,15 @@ public class ServerDemo {
         });
 
         server.onPacket(PlayerMovePacket.class, (connection, packet) -> {
-            System.out.println("RECEIVE MOVE PACKET");
+            // System.out.println("RECEIVE MOVE PACKET");
             float x = packet.x;
-
+            System.out.println("ID: "+packet.requestId);
             boolean success = new Random().nextBoolean(); // Player have 50% chance to walk successfully, otherwise, he will have a rollback
             if (success) {
                 // Send to other players
                 Player player = getPlayer(connection);
-                player.setX(x);
-
+                player.setX(player.getX()+x);
+                System.out.println("X: " + player.getX());
                 // TODO entity interpolation
                 /*EntityMovePacket entityMovePacket = new EntityMovePacket();
                 entityMovePacket.id = client.getID();
@@ -49,9 +49,11 @@ public class ServerDemo {
 
                 // Send position change to all clients except the one which moved (client object)
                 server.sendToAllExceptTCP(connection, entityMovePacket);*/
+                return PacketResult.SUCCESS;
             } else {
                 // Packet is invalid (ex: moving too fast)
-                server.sendReconciliation(connection, packet);
+                return PacketResult.RECONCILIATION;
+                //server.sendReconciliation(connection, packet);
             }
         });
 
