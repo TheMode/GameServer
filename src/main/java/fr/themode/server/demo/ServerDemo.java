@@ -40,7 +40,7 @@ public class ServerDemo {
                 Player player = getPlayer(connection);
                 float newX = player.getX() + x;
                 player.setX(newX);
-                System.out.println("The player " + connection.getID() + " position is now :" + newX);
+                System.out.println("The player " + connection.getID() + " position is now: " + newX);
 
                 // the value represents the change in position compared to the last server update
                 this.positions.put(connection, this.positions.getOrDefault(connection, 0f) + x);

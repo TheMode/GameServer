@@ -18,6 +18,7 @@ public class Client {
 
     private com.esotericsoftware.kryonet.Client kryoClient;
     private GameListener listener;
+    private PingListener pingListener;
     private Kryo serverKryo;
     private Kryo kryo;
 
@@ -35,6 +36,7 @@ public class Client {
 
         this.kryoClient = new com.esotericsoftware.kryonet.Client();
         this.listener = new GameListener();
+        this.pingListener = new PingListener(kryoClient);
         this.serverKryo = this.kryoClient.getKryo();
         this.kryo = new Kryo();
 
@@ -43,6 +45,7 @@ public class Client {
         this.states.put(0L, localState);
 
         this.kryoClient.addListener(listener);
+        this.kryoClient.addListener(pingListener);
         registerPacket(Packet.class);
         registerPacket(ReconciliationPacket.class);
 
@@ -81,9 +84,12 @@ public class Client {
         this.kryoClient.sendUDP(packet);
     }
 
+    public int getPing() {
+        return pingListener.getPing();
+    }
+
     public void onReconciliation(Consumer<Long> consumer) {
         this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
-            System.out.println("ERROR");
             long requestId = packet.requestId;
             restoreState(requestId);
             consumer.accept(requestId);
