@@ -2,8 +2,10 @@ package fr.themode.client;
 
 import com.esotericsoftware.kryo.Kryo;
 import fr.themode.GameListener;
+import fr.themode.packet.AskServerInfoPacket;
 import fr.themode.packet.Packet;
 import fr.themode.packet.ReconciliationPacket;
+import fr.themode.packet.ServerInfoPacket;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,6 +17,8 @@ public class Client {
     private String address;
     private int tcp, udp;
     private int timeout;
+
+    private int serverUpdateDelay;
 
     private com.esotericsoftware.kryonet.Client kryoClient;
     private GameListener listener;
@@ -48,15 +52,21 @@ public class Client {
         this.kryoClient.addListener(pingListener);
         registerPacket(Packet.class);
         registerPacket(ReconciliationPacket.class);
+        registerPacket(ServerInfoPacket.class);
+        registerPacket(AskServerInfoPacket.class);
 
         registerObject(LocalState.class);
         registerObject(HashMap.class);
+
+        setupDefaultListeners();
     }
 
     public void connect() {
         this.kryoClient.start();
         try {
             this.kryoClient.connect(timeout, address, tcp, udp);
+
+            askServerInfo();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +96,12 @@ public class Client {
 
     public int getPing() {
         return pingListener.getPing();
+    }
+
+    public <T extends Packet> void onPacket(Class<T> clazz, Consumer<T> callback) {
+        listener.addTypeHandler(clazz, ((connection, packet) -> {
+            callback.accept(packet);
+        }));
     }
 
     public void onReconciliation(Consumer<Long> consumer) {
@@ -118,5 +134,16 @@ public class Client {
 
     public LocalState getLocalState() {
         return localState;
+    }
+
+    private void setupDefaultListeners() {
+        onPacket(ServerInfoPacket.class, (packet) -> {
+            this.serverUpdateDelay = packet.updateDelay;
+            //System.out.println("Delay: " + this.serverUpdateDelay);
+        });
+    }
+
+    private void askServerInfo() {
+        this.kryoClient.sendTCP(new AskServerInfoPacket());
     }
 }

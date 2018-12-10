@@ -4,8 +4,10 @@ import com.esotericsoftware.kryo.Kryo;
 import fr.themode.Callback;
 import fr.themode.GameConnection;
 import fr.themode.GameListener;
+import fr.themode.packet.AskServerInfoPacket;
 import fr.themode.packet.Packet;
 import fr.themode.packet.ReconciliationPacket;
+import fr.themode.packet.ServerInfoPacket;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -40,6 +42,11 @@ public class Server {
         this.kryoServer.addListener(listener);
         registerPacket(Packet.class);
         registerPacket(ReconciliationPacket.class);
+        registerPacket(ServerInfoPacket.class);
+        registerPacket(AskServerInfoPacket.class);
+
+        setupDefaultListeners();
+
     }
 
     public Server(int port) {
@@ -119,6 +126,15 @@ public class Server {
 
     public void onDisconnection(Callback.DisconnectionCallBack disconnectionCallBack) {
         listener.setDisconnectionCallBack(disconnectionCallBack);
+    }
+
+    private void setupDefaultListeners() {
+        onPacket(AskServerInfoPacket.class, (connection, packet) -> {
+            ServerInfoPacket serverInfoPacket = new ServerInfoPacket();
+            serverInfoPacket.updateDelay = 1000 / this.update_per_seconds;
+            sendToTCP(connection, serverInfoPacket);
+            return PacketResult.SUCCESS;
+        });
     }
 
 }
