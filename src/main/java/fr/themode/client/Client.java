@@ -132,6 +132,10 @@ public class Client {
         //System.out.println("SIZE AFTER: " + states.size());
     }
 
+    public int getServerUpdateDelay() {
+        return serverUpdateDelay;
+    }
+
     public LocalState getLocalState() {
         return localState;
     }

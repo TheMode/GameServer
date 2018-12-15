@@ -23,10 +23,6 @@ public class ClientDemo {
             System.out.println("An error occurred with the requestId: " + requestId);
         });
 
-        // Used for objects which change over time that are sent to server and then to current client by other clients (such as players, pets...)
-        // Check "Entity interpolation" for more informations
-        // EntityState entityState = client.getEntityState();
-
         // Used for everything local where changes need server authorization (ex: local player movements)
         // All used components types need to be register using Client#registerObject
         LocalState localState = client.getLocalState();
