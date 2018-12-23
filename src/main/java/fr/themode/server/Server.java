@@ -4,10 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import fr.themode.Callback;
 import fr.themode.GameConnection;
 import fr.themode.GameListener;
-import fr.themode.packet.AskServerInfoPacket;
-import fr.themode.packet.Packet;
-import fr.themode.packet.ReconciliationPacket;
-import fr.themode.packet.ServerInfoPacket;
+import fr.themode.packet.*;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -42,6 +39,7 @@ public class Server {
         this.kryoServer.addListener(listener);
         registerPacket(Packet.class);
         registerPacket(ReconciliationPacket.class);
+        registerPacket(StateSuccessPacket.class);
         registerPacket(ServerInfoPacket.class);
         registerPacket(AskServerInfoPacket.class);
 

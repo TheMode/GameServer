@@ -4,6 +4,7 @@ import fr.themode.Callback;
 import fr.themode.GameConnection;
 import fr.themode.packet.Packet;
 import fr.themode.packet.ReconciliationPacket;
+import fr.themode.packet.StateSuccessPacket;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,6 +17,9 @@ public class ServerUpdate {
     private Map<Class<? extends Packet>, Callback.PacketCallBack> callbacks;
 
     private Map<GameConnection, Long> requiredRequestId;
+
+    // Update cache
+    private Map<GameConnection, Long> lastSuccessfulPacket;
 
     private int ups;
 
@@ -32,6 +36,8 @@ public class ServerUpdate {
         this.callbacks = new HashMap<>();
 
         this.requiredRequestId = new HashMap<>();
+
+        this.lastSuccessfulPacket = new HashMap<>();
     }
 
     public <T extends Packet> void setCallbacks(Class<T> clazz, Callback.PacketCallBack<T> callBack) {
@@ -63,7 +69,10 @@ public class ServerUpdate {
                                 connection.setLastRequestId(packet.requestId);
                                 PacketResult result = callback.apply(connection, packet);
                                 switch (result) {
+                                    case NEUTRAL:
+                                        break;
                                     case SUCCESS:
+                                        this.lastSuccessfulPacket.put(connection, connection.getLastRequestId());
                                         // TODO send validation ?
                                         break;
                                     case RECONCILIATION:
@@ -73,6 +82,20 @@ public class ServerUpdate {
                             }
                         }
                         //System.out.println("delay: " + (System.currentTimeMillis() - time));
+
+                        // Send success packet
+                        if (!lastSuccessfulPacket.isEmpty()) {
+                            for (Map.Entry<GameConnection, Long> entry : lastSuccessfulPacket.entrySet()) {
+                                GameConnection connection = entry.getKey();
+                                long requestId = entry.getValue();
+                                StateSuccessPacket successPacket = new StateSuccessPacket();
+                                successPacket.requestId = requestId;
+                                connection.getKryoConnection().sendTCP(successPacket);
+                            }
+                            lastSuccessfulPacket.clear();
+                        }
+
+                        // Server update callback
                         if (runnable != null) {
                             runnable.run();
                         }
@@ -99,12 +122,10 @@ public class ServerUpdate {
         long lastRequestId = connection.getLastRequestId();
         long requiredRequestId = this.requiredRequestId.getOrDefault(connection, -1L);
         long requestId = packet.requestId;
+        //System.out.println("FALSE: "+lastRequestId+" : "+requiredRequestId+" : "+requestId);
         if (requestId == requiredRequestId && requestId != -1) {
             this.requiredRequestId.remove(connection);
-        } else if (requiredRequestId != -1) {
-            //System.out.println("FALSE: "+lastRequestId+" : "+requiredRequestId+" : "+requestId);
-            return false;
-        }
+        } else return requiredRequestId == -1;
         return true;
     }
 

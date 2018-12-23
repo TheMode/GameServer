@@ -2,10 +2,7 @@ package fr.themode.client;
 
 import com.esotericsoftware.kryo.Kryo;
 import fr.themode.GameListener;
-import fr.themode.packet.AskServerInfoPacket;
-import fr.themode.packet.Packet;
-import fr.themode.packet.ReconciliationPacket;
-import fr.themode.packet.ServerInfoPacket;
+import fr.themode.packet.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -52,6 +49,7 @@ public class Client {
         this.kryoClient.addListener(pingListener);
         registerPacket(Packet.class);
         registerPacket(ReconciliationPacket.class);
+        registerPacket(StateSuccessPacket.class);
         registerPacket(ServerInfoPacket.class);
         registerPacket(AskServerInfoPacket.class);
 
@@ -145,9 +143,17 @@ public class Client {
             this.serverUpdateDelay = packet.updateDelay;
             //System.out.println("Delay: " + this.serverUpdateDelay);
         });
+
+        onPacket(StateSuccessPacket.class, stateSuccessPacket -> {
+            clearStates(stateSuccessPacket.requestId);
+        });
     }
 
     private void askServerInfo() {
         this.kryoClient.sendTCP(new AskServerInfoPacket());
+    }
+
+    private void clearStates(long max) {
+        this.states.keySet().removeIf(id -> id < max);
     }
 }
