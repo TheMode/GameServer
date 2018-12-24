@@ -92,6 +92,11 @@ public class Server {
         kryoServer.sendToAllExceptUDP(connection.getID(), packet);
     }
 
+
+    public void registerObject(Class<?> clazz) {
+        this.kryo.register(clazz);
+    }
+
     public void registerPacket(Class<? extends Packet> clazz) {
         this.kryo.register(clazz);
     }
@@ -124,6 +129,10 @@ public class Server {
 
     public void onDisconnection(Callback.DisconnectionCallBack disconnectionCallBack) {
         listener.setDisconnectionCallBack(disconnectionCallBack);
+    }
+
+    public Kryo getKryo() {
+        return kryo;
     }
 
     private void setupDefaultListeners() {
