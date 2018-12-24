@@ -1,6 +1,7 @@
 package fr.themode;
 
 import com.esotericsoftware.kryonet.Connection;
+import fr.themode.packet.Packet;
 
 public class GameConnection {
 
@@ -17,6 +18,14 @@ public class GameConnection {
 
     public Connection getKryoConnection() {
         return kryoConnection;
+    }
+
+    public void sendPacketTCP(Packet packet) {
+        getKryoConnection().sendTCP(packet);
+    }
+
+    public void sendPacketUDP(Packet packet) {
+        getKryoConnection().sendUDP(packet);
     }
 
     public long getLastRequestId() {
