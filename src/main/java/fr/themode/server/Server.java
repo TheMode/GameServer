@@ -93,7 +93,7 @@ public class Server {
     }
 
 
-    public void registerObject(Class<?> clazz) {
+    public void registerPacketObject(Class<?> clazz) {
         this.kryo.register(clazz);
     }
 

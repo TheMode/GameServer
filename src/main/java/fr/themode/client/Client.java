@@ -79,6 +79,10 @@ public class Client {
         this.kryo.register(clazz);
     }
 
+    public void registerPacketObject(Class<?> clazz) {
+        this.serverKryo.register(clazz);
+    }
+
     public void registerPacket(Class<? extends Packet> clazz) {
         this.serverKryo.register(clazz);
     }
