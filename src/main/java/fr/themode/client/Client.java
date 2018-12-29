@@ -74,6 +74,9 @@ public class Client {
         this.timeout = timeout;
     }
 
+    public boolean isConnected() {
+        return this.kryoClient.isConnected();
+    }
 
     public void registerObject(Class<?> clazz) {
         this.kryo.register(clazz);
@@ -140,6 +143,10 @@ public class Client {
 
     public LocalState getLocalState() {
         return localState;
+    }
+
+    public com.esotericsoftware.kryonet.Client getKryoClient() {
+        return kryoClient;
     }
 
     private void setupDefaultListeners() {

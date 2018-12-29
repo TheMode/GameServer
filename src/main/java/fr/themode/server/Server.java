@@ -135,6 +135,10 @@ public class Server {
         return kryo;
     }
 
+    public com.esotericsoftware.kryonet.Server getKryoServer() {
+        return kryoServer;
+    }
+
     private void setupDefaultListeners() {
         onPacket(AskServerInfoPacket.class, (connection, packet) -> {
             ServerInfoPacket serverInfoPacket = new ServerInfoPacket();
