@@ -36,18 +36,19 @@ public class ClientDemo {
         while (true) {
             // Save current local state before changing it (in order to backup it with server reconciliation)
             // Should be used each time we modify a state component and send a packet related to this
-            client.saveCurrentState();
 
-            Player player = localState.getComponent("player");
+            client.newState((stateId) -> {
+                Player player = localState.getComponent("player");
 
-            player.move(1, 0);
-            PlayerMovePacket movePacket = new PlayerMovePacket();
-            movePacket.x = 1;
+                player.move(1, 0);
+                PlayerMovePacket movePacket = new PlayerMovePacket();
+                movePacket.x = 1;
 
-            System.out.println("Position: " + player.getX());
+                System.out.println("Position: " + player.getX());
 
-            // Before being sent, movePacket get an unique requestId
-            client.sendTCP(movePacket);
+                // Before being sent, movePacket get an unique requestId
+                client.sendTCP(movePacket);
+            });
 
             if (System.currentTimeMillis() - time >= maxTime) {
                 System.out.println("END CLIENT");

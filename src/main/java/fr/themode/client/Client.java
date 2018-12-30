@@ -117,9 +117,9 @@ public class Client {
         }));
     }
 
-    public void saveCurrentState() {
-        LocalState copiedState = kryo.copy(localState);
-        this.states.put(++stateCounter, copiedState);
+    public void newState(Consumer<Long> consumer) {
+        saveCurrentState();
+        consumer.accept(stateCounter);
     }
 
     public void restoreState(long id) {
@@ -162,6 +162,11 @@ public class Client {
 
     private void askServerInfo() {
         this.kryoClient.sendTCP(new AskServerInfoPacket());
+    }
+
+    private void saveCurrentState() {
+        LocalState copiedState = kryo.copy(localState);
+        this.states.put(++stateCounter, copiedState);
     }
 
     private void clearStates(long max) {
