@@ -119,14 +119,20 @@ public class ServerUpdate {
 
     private boolean shouldBeKeep(GameConnection connection, Packet packet) {
         // Check if packet should be keep
-        long lastRequestId = connection.getLastRequestId();
-        long requiredRequestId = this.requiredRequestId.getOrDefault(connection, -1L);
+        boolean contains = this.requiredRequestId.containsKey(connection);
+        if (!contains)
+            return true;
+
+        //long lastRequestId = connection.getLastRequestId();
+        long requiredRequestId = this.requiredRequestId.get(connection);
         long requestId = packet.requestId;
         //System.out.println("FALSE: "+lastRequestId+" : "+requiredRequestId+" : "+requestId);
         if (requestId == requiredRequestId && requestId != -1) {
             this.requiredRequestId.remove(connection);
-        } else return requiredRequestId == -1;
-        return true;
+            return true;
+        } else {
+            return requiredRequestId == -1;
+        }
     }
 
 }
