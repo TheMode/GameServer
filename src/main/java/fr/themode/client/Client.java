@@ -109,6 +109,10 @@ public class Client {
         }));
     }
 
+    public <T extends Packet> void removePacketListener(Class<T> clazz) {
+        listener.removeTypeHandler(clazz);
+    }
+
     public void onReconciliation(Consumer<Long> consumer) {
         this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
             long requestId = packet.requestId;
