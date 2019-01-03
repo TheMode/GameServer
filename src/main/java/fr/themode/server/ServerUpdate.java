@@ -94,11 +94,10 @@ public class ServerUpdate {
                             }
                             lastSuccessfulPacket.clear();
                         }
-
-                        // Server update callback
-                        if (runnable != null) {
-                            runnable.run();
-                        }
+                    }
+                    // Server update callback
+                    if (runnable != null) {
+                        runnable.run();
                     }
                 }
             }
