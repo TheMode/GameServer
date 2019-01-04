@@ -27,6 +27,7 @@ public class Client {
 
     private Map<Long, LocalState> states;
     private long stateCounter;
+    private long maxVerifiedState;
 
     public Client(String address, int tcp, int udp) {
         this.address = address;
@@ -122,6 +123,7 @@ public class Client {
     }
 
     public void newState(Consumer<Long> consumer) {
+        clearStates(maxVerifiedState);
         saveCurrentState();
         consumer.accept(stateCounter);
     }
@@ -154,13 +156,18 @@ public class Client {
     }
 
     private void setupDefaultListeners() {
+        this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
+            long requestId = packet.requestId;
+            restoreState(requestId);
+        }));
+
         onPacket(ServerInfoPacket.class, (packet) -> {
             this.serverUpdateDelay = packet.updateDelay;
             //System.out.println("Delay: " + this.serverUpdateDelay);
         });
 
         onPacket(StateSuccessPacket.class, stateSuccessPacket -> {
-            clearStates(stateSuccessPacket.requestId);
+            this.maxVerifiedState = Math.max(maxVerifiedState, stateSuccessPacket.requestId);
         });
     }
 
