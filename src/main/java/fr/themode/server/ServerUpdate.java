@@ -61,9 +61,9 @@ public class ServerUpdate {
                         int size = packets.size();
                         for (int i = 0; i < size; i++) {
                             PacketHandler packetHandler = packets.poll();
-                            GameConnection connection = packetHandler.connection;
-                            if (connection == null)
+                            if (packetHandler == null)
                                 continue;
+                            GameConnection connection = packetHandler.connection;
                             Packet packet = packetHandler.packet;
                             Class<? extends Packet> clazz = packet.getClass();
                             Callback.PacketCallBack callback = this.callbacks.getOrDefault(clazz, null);
