@@ -27,6 +27,8 @@ public class Client {
 
     private ConcurrentHashMap<Long, LocalState> states;
     private long stateCounter;
+
+    private boolean shouldCleanState;
     private long maxVerifiedState;
 
     public Client(String address, int tcp, int udp) {
@@ -123,7 +125,8 @@ public class Client {
     }
 
     public void newState(Consumer<Long> consumer) {
-        clearStates(maxVerifiedState);
+        if (shouldCleanState)
+            clearStates(maxVerifiedState);
         saveCurrentState();
         consumer.accept(stateCounter);
     }
@@ -165,7 +168,9 @@ public class Client {
         });
 
         onPacket(StateSuccessPacket.class, stateSuccessPacket -> {
-            this.maxVerifiedState = Math.max(maxVerifiedState, stateSuccessPacket.requestId);
+            long verifiedState = stateSuccessPacket.requestId - 1;
+            this.shouldCleanState = true;
+            this.maxVerifiedState = Math.max(maxVerifiedState, verifiedState);
         });
     }
 
@@ -180,5 +185,6 @@ public class Client {
 
     private void clearStates(long max) {
         this.states.keySet().removeIf(id -> id < max);
+        this.shouldCleanState = false;
     }
 }
