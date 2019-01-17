@@ -132,9 +132,11 @@ public class Client {
     }
 
     public void restoreState(long id) {
-        if (!states.containsKey(id))
-            throw new NullPointerException("There isn't any state with the id " + id);
-
+        if (!states.containsKey(id) && !states.isEmpty()) {
+            long newID = states.keySet().stream().max(Long::compareTo).get();
+            restoreState(newID);
+            return;
+        }
 
         LocalState newState = this.states.get(id);
         this.localState.update(newState);
