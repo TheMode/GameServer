@@ -130,8 +130,7 @@ public class Client {
 
     public void restoreState(long id) {
         if (!states.containsKey(id))
-            return;
-        //throw new NullPointerException("There isn't any state with the id " + id);
+            throw new NullPointerException("There isn't any state with the id " + id);
 
 
         LocalState newState = this.states.get(id);
@@ -142,8 +141,6 @@ public class Client {
         //System.out.println("SIZE BEFORE: " + states.size());
         this.states.keySet().removeIf(stateId -> stateId > id - 1);
         //System.out.println("SIZE AFTER: " + states.size());
-
-        this.maxVerifiedState = Math.min(0, stateCounter);
     }
 
     public int getServerUpdateDelay() {
