@@ -27,7 +27,8 @@ public class Client {
 
     private Map<Long, LocalState> states;
     private long stateCounter;
-    private long maxVerifiedState;
+    private boolean shouldRestore;
+    private long stateToRestore, maxVerifiedState;
 
     public Client(String address, int tcp, int udp) {
         this.address = address;
@@ -123,6 +124,10 @@ public class Client {
     }
 
     public void newState(Consumer<Long> consumer) {
+        if (shouldRestore) {
+            restoreState(stateToRestore);
+            this.shouldRestore = false;
+        }
         clearStates(maxVerifiedState);
         saveCurrentState();
         consumer.accept(stateCounter);
@@ -142,6 +147,8 @@ public class Client {
         //System.out.println("SIZE BEFORE: " + states.size());
         this.states.keySet().removeIf(stateId -> stateId > id - 1);
         //System.out.println("SIZE AFTER: " + states.size());
+
+        this.maxVerifiedState = Math.min(0, stateCounter);
     }
 
     public int getServerUpdateDelay() {
@@ -158,13 +165,12 @@ public class Client {
 
     private void setupDefaultListeners() {
         this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
-            long requestId = packet.requestId;
-            restoreState(requestId);
+            stateToRestore = packet.requestId;
+            shouldRestore = true;
         }));
 
         onPacket(ServerInfoPacket.class, (packet) -> {
             this.serverUpdateDelay = packet.updateDelay;
-            //System.out.println("Delay: " + this.serverUpdateDelay);
         });
 
         onPacket(StateSuccessPacket.class, stateSuccessPacket -> {
