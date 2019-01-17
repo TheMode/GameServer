@@ -132,11 +132,8 @@ public class Client {
     }
 
     public void restoreState(long id) {
-        if (!states.containsKey(id) && !states.isEmpty()) {
-            long newID = states.keySet().stream().max(Long::compareTo).get() - 1;
-            restoreState(newID);
+        if (!states.containsKey(id))
             return;
-        }
 
         LocalState newState = this.states.get(id);
         this.localState.update(newState);
