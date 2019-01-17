@@ -130,7 +130,8 @@ public class Client {
 
     public void restoreState(long id) {
         if (!states.containsKey(id))
-            throw new NullPointerException("There isn't any state with the id " + id);
+            return;
+        //throw new NullPointerException("There isn't any state with the id " + id);
 
 
         LocalState newState = this.states.get(id);
