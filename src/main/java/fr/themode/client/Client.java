@@ -6,7 +6,7 @@ import fr.themode.packet.*;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class Client {
@@ -25,10 +25,9 @@ public class Client {
 
     private LocalState localState;
 
-    private Map<Long, LocalState> states;
+    private ConcurrentHashMap<Long, LocalState> states;
     private long stateCounter;
-    private boolean shouldRestore;
-    private long stateToRestore, maxVerifiedState;
+    private long maxVerifiedState;
 
     public Client(String address, int tcp, int udp) {
         this.address = address;
@@ -44,7 +43,7 @@ public class Client {
         this.kryo = new Kryo();
 
         this.localState = new LocalState();
-        this.states = new HashMap<>();
+        this.states = new ConcurrentHashMap<>();
         this.states.put(0L, localState);
 
         this.kryoClient.addListener(listener);
@@ -124,10 +123,6 @@ public class Client {
     }
 
     public void newState(Consumer<Long> consumer) {
-        if (shouldRestore) {
-            restoreState(stateToRestore);
-            this.shouldRestore = false;
-        }
         clearStates(maxVerifiedState);
         saveCurrentState();
         consumer.accept(stateCounter);
@@ -165,8 +160,7 @@ public class Client {
 
     private void setupDefaultListeners() {
         this.listener.addTypeHandler(ReconciliationPacket.class, ((connection, packet) -> {
-            stateToRestore = packet.requestId;
-            shouldRestore = true;
+            restoreState(packet.requestId);
         }));
 
         onPacket(ServerInfoPacket.class, (packet) -> {
